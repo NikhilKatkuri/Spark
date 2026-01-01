@@ -1,0 +1,15 @@
+# Dependency directories
+node_modules/ 
+
+#  folder 
+.gitlite/
+dist/*
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# yamls
+*.yaml
+*.yml
