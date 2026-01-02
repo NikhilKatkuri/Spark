@@ -3,7 +3,9 @@
 import { Command } from 'commander'
 import pkg from '../package.json'
 import { CreateCommandOptions } from './types'
-import { outro, text } from '@clack/prompts'
+import { outro, select, text } from '@clack/prompts'
+import { templates } from './configs/template'
+import addOns from './engine/addon'
 
 /**
  * Entry point for the CLI application.
@@ -40,33 +42,44 @@ program
     .argument('[project-name]', 'name of the project to create')
     .option('--src-dir <directory>', 'source directory for the project', process.cwd())
     .option('--template <template-name>', 'specify a project template')
-    .option('--git', 'initialize a git repository') 
+    .option('--git', 'initialize a git repository')
+    .option('--y, --yes', 'use default options', false)
     .action(async (projectName, opts) => {
         let options: CreateCommandOptions = {
             projectName: projectName ?? undefined,
             srcDir: opts.srcDir,
             template: opts.template || undefined,
             packageManager: opts.usePnpm ? 'pnpm' : opts.useYarn ? 'yarn' : 'npm',
-            git: opts.git || false, 
+            git: opts.git || false,
+            addons: [],
+            useDefaults: opts.yes || false,
+            compatibilityVersion: 'latest',
         }
 
         if (!options.projectName) {
             const projectNameInput = await text({
                 message: 'Please enter a project name:',
-                defaultValue: 'my-spark-project',
+                initialValue: 'my-spark-project',
             })
             options.projectName = projectNameInput as string
         }
 
         if (!options.template) {
-            const templateInput = await text({
+            const templateOptions = templates.map((template) => ({
+                value: template.name,
+                label: template.name,
+            }))
+            const templateInput = await select({
                 message: 'Please enter a template name:',
-                defaultValue: 'basic',
+                options: templateOptions,
+                initialValue: templates[0].name,
             })
             options.template = templateInput as string
         }
 
-        outro(`Creating project with options: ${JSON.stringify(options, null, 2)}`)
+        await addOns(options)
+
+        outro(`Thanks for using Spark! Your project "${options.projectName}" is being created.`)
     })
 
 program.parse(process.argv)

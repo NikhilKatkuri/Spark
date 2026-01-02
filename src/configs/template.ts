@@ -1,5 +1,5 @@
 // don't fix, stil in research phase
-interface Template {
+export interface Template {
     type: 'web' | 'app' | 'desktop' | 'backend' | 'fullstack' | 'deployment' | 'library'
     name: string
     tools: string[]
